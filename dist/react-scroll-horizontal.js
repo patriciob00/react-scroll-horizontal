@@ -16,8 +16,6 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _reactMotion = require('react-motion');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -35,137 +33,67 @@ var HorizontalScroll = function (_Component) {
     var _this = _possibleConstructorReturn(this, (HorizontalScroll.__proto__ || Object.getPrototypeOf(HorizontalScroll)).call(this, props));
 
     _this.state = { animValues: 0 };
-
     _this.onScrollStart = _this.onScrollStart.bind(_this);
-    _this.resetMin = _this.resetMin.bind(_this);
-    _this.resetMax = _this.resetMax.bind(_this);
-
     return _this;
   }
 
   _createClass(HorizontalScroll, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      // Place the 'lock__' class on the HTML element - if toggled
-      if (this.props.pageLock) {
-        var orig = document.firstElementChild.className;
-        document.firstElementChild.className = orig + (orig ? ' ' : '') + 'locked__';
-      } else return;
-    }
-  }, {
-    key: 'componentWillUnmount',
-    value: function componentWillUnmount() {
-      if (this.props.pageLock) {
-        document.firstElementChild.className = document.firstElementChild.className.replace(/ ?locked__/, '');
-      } else return;
-    }
-  }, {
-    key: 'componentDidUpdate',
-    value: function componentDidUpdate(nextProps, nextState) {
-
-      // Calculate the bounds of the scroll area
-      var el = _reactDom2.default.findDOMNode(this.refs['hScrollParent']);
-
-      var max = el.lastElementChild.scrollWidth;
-      var win = el.offsetWidth;
-
-      // Get the new animation values
-      var curr = this.state.animValues;
-
-      // Establish the bounds. We do this every time b/c it might change.
-      var bounds = -(max - win);
-
-      // Logic to hold everything in place
-      if (curr >= 1) {
-        this.resetMin();
-      } else if (curr <= bounds) {
-        var x = bounds + 1;
-        this.resetMax(x);
-      }
-    }
-  }, {
     key: 'onScrollStart',
     value: function onScrollStart(e) {
-      var _this2 = this;
-
       e.preventDefault();
-      // If scrolling on x axis, change to y axis
-      // Otherwise just get the y deltas
-      // Basically, this for Apple mice that allow
-      // horizontal scrolling by default
       var rawData = e.deltaY ? e.deltaY : e.deltaX;
       var mouseY = Math.floor(rawData);
 
-      // Bring in the existing animation values
-      var animationValue = this.state.animValues;
-      var newAnimationValue = animationValue + mouseY;
-      var newAnimationValueNegative = animationValue - mouseY;
+      // // Bring in the existing animation values
+      var newAnimationValue = mouseY;
+      var newAnimationValueNegative = -mouseY;
 
-      var scrolling = function scrolling() {
-        _this2.props.reverseScroll ? _this2.setState({ animValues: newAnimationValueNegative }) : _this2.setState({ animValues: newAnimationValue });
-      };
+      var deltaMotion = 0;
 
-      // Begin Scrolling Animation
-      requestAnimationFrame(scrolling);
-    }
-  }, {
-    key: 'resetMin',
-    value: function resetMin() {
-      this.setState({ animValues: 0 });
-    }
-  }, {
-    key: 'resetMax',
-    value: function resetMax(x) {
-      this.setState({ animValues: x });
+      if (this.props.reverseScroll) {
+        deltaMotion = newAnimationValueNegative;
+      } else {
+        deltaMotion = newAnimationValue;
+      }
+
+      _reactDom2.default.findDOMNode(this).scrollLeft += deltaMotion;
     }
   }, {
     key: 'render',
     value: function render() {
-      var _this3 = this;
+      var scrollingElementStyles = {
+        display: 'inline-flex',
+        height: '100%',
+        position: 'absolute',
+        willChange: 'transform' };
 
-      var _props = this.props;
-      var config = _props.config;
-      var style = _props.style;
-      var width = style.width;
-      var height = style.height;
+      var _props = this.props,
+          config = _props.config,
+          style = _props.style;
+      var width = style.width,
+          height = style.height,
+          overflow = style.overflow;
 
-      var springConfig = config ? config : _reactMotion.presets.noWobble;
+      var springConfig = config ? config : presets.noWobble;
 
       // Styles
       var styles = _extends({
         height: height ? height : '100%',
         width: width ? width : '100%',
-        overflow: 'hidden',
+        overflow: overflow ? overflow : 'hidden',
         position: 'relative'
       }, styles);
 
       return _react2.default.createElement(
         'div',
-        {
-          onWheel: this.onScrollStart,
+        { onWheel: this.onScrollStart,
           ref: 'hScrollParent',
           style: styles,
-          className: 'scroll-horizontal'
-        },
+          className: 'scroll-horizontal' },
         _react2.default.createElement(
-          _reactMotion.Motion,
-          { style: { z: (0, _reactMotion.spring)(this.state.animValues, springConfig) } },
-          function (_ref) {
-            var z = _ref.z;
-
-            var scrollingElementStyles = {
-              transform: 'translate3d(' + z + 'px, 0,0)',
-              display: 'inline-flex',
-              height: '100%',
-              position: 'absolute',
-              willChange: 'transform'
-            };
-            return _react2.default.createElement(
-              'div',
-              { style: scrollingElementStyles },
-              _this3.props.children
-            );
-          }
+          'div',
+          { style: scrollingElementStyles },
+          this.props.children
         )
       );
     }
@@ -185,8 +113,8 @@ HorizontalScroll.proptypes = {
 };
 
 HorizontalScroll.defaultProps = {
-  reverseScroll: false,
+  reverseScroll: true,
   pageLock: false,
   config: null,
-  style: { width: '100%', height: '100%' }
+  style: { width: '100%', height: '100%', overflow: 'hidden' }
 };

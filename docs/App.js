@@ -23,15 +23,13 @@ export default class App extends React.Component {
             Feed &lt;HorizontalScroll&gt; one child, or many children.
             So long as they have a defined width/height, this component will
             take care of the rest.
-          </h3>
-          <div className="flex justify-center">
-            <iframe src="https://ghbtns.com/github-btn.html?user=hew&repo=react-scroll-horizontal&type=star&count=true" frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
-          </div>
+          </h3> 
+          
         </div>
         <div className="hr"></div>
         <h1 className='center'>Full Width</h1>
         <div style={{ height: `22.7em`}}>
-            <HorizontalScroll >
+            <HorizontalScroll style={{overflow: `auto`}}>
               { exampleItems }
             </HorizontalScroll>
         </div>
